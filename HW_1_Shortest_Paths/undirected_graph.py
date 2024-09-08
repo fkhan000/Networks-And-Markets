@@ -3,48 +3,57 @@ import numpy as np
 from collections import deque
 
 
-class Node:
-    def __init__(self):
-        self.neighbors = []
-
-    def add_neighbor(self, node):
-            self.neighbors.append(node)
-
 class UndirectedGraph:
 
     def __init__(self, adjency_matrix: List[List[bool]]):
-        self.nodes = [Node() for _ in adjency_matrix]
-
+        
+        self.nodes = [[] for _ in range(len(adjency_matrix))]
+        
         for row in range(len(adjency_matrix)):
              for col in range(len(adjency_matrix)):
                   if adjency_matrix[row][col]:
-                       self.nodes[row].add_neighbor(self.nodes[col])
+                       self.nodes[row].append(col)
 
 def create_graph(n, p):
-    
-    adjency_matrix = np.random.uniform(0, 1, size = (n, n)) < p
-
-    return UndirectedGraph(adjency_matrix)
+     adjency_matrix = np.random.rand(n, n) < p
+     
+     return UndirectedGraph(adjency_matrix)
 
 def shortest_path(G: UndirectedGraph, i: int, j: int) -> int:
 
-     queue = deque([(i, [i])])
-     visited = set()
+     queues = [deque([(i, 0)]), deque([(j, 0)])]
+     visited = [{i:0}, {j:0}]
 
-     while queue:
-          current_node, path = queue.popleft()
+     while queues[0] and queues[1]:
 
-          if G[current_node] == G[j]:
-               return len(path)
-          
-          if current_node not in visited:
-               visited.add(current_node)
-          
-          for neighbor in G[current_node].neighbors:
-               if neighbor not in visited:
-                    queue.append((neighbor, path + [neighbor]))
-     
+          for index in range(2):
+               current_node, path_length = queues[index].popleft()
+
+               for neighbor in G.nodes[current_node]:
+                    if neighbor not in visited[index]:
+                         visited[index][neighbor] = path_length + 1
+                         queues[index].append((neighbor, path_length + 1))
+                    if neighbor in visited[(index + 1) % 2]:
+                         return visited[index][neighbor] + visited[(index + 1) % 2][neighbor]
+                    
      return -1
 
+def avg_shortest_path(G: UndirectedGraph, num_samples=1000):
 
-          
+     indices = list(range(len(G.nodes)))
+     avg_length = 0
+
+     for _ in range(num_samples):
+          length = -1
+          while(length == -1):
+               i, j = np.random.choice(indices, 2, replace=False)
+               length = shortest_path(G, i, j)
+          avg_length += length
+     return avg_length / num_samples
+
+G = create_graph(1000, 0.8)
+import time
+
+start = time.time()
+print(avg_shortest_path(G))
+print(time.time()-start)
