@@ -3,7 +3,7 @@ import numpy as np
 import time
 from collections import deque
 import matplotlib.pyplot as plt
-
+from tqdm  import tqdm
 
 class UndirectedGraph:
 
@@ -56,7 +56,7 @@ def avg_shortest_path(G: UndirectedGraph, num_samples=1000):
      indices = list(range(len(G.nodes)))
      avg_length = 0
 
-     for _ in range(num_samples):
+     for _ in tqdm(range(num_samples)):
           i, j = np.random.choice(indices, 2, replace=False)
           length = shortest_path(G, i, j)
 
@@ -78,5 +78,62 @@ def simulate_varying_prob(prob_vals):
      plt.plot(prob_vals, avg_distances)
      plt.show()
 
-G = create_graph(1000, 0.1)
-print(avg_shortest_path(G))
+def create_graph_simple(N):
+     adjency_matrix = np.zeros((N, N))
+     for i in range(N):
+          if i + 1 < N:
+               adjency_matrix[i][i + 1] = 1
+               adjency_matrix[i + 1][i] = 1
+          if i - 1 < 0:
+               adjency_matrix[i][i - 1] = 1
+               adjency_matrix[i-1][i] = 1
+     
+     print(adjency_matrix)
+     return UndirectedGraph(adjency_matrix)  
+
+def create_graph_v2(X, Y):
+     adjency_matrix = np.zeros((X + Y, X + Y))
+     for i in range(X+Y):
+          if i + 1 < X+Y:
+               adjency_matrix[i][i + 1] = 1
+               adjency_matrix[i + 1][i] = 1
+          if i - 1 > 0:
+               adjency_matrix[i][i - 1] = 1
+               adjency_matrix[i-1][i] = 1
+
+     ones = np.ones((X, X))
+
+     adjency_matrix[:X,:X] = ones
+     
+     print(adjency_matrix)
+     return UndirectedGraph(adjency_matrix)           
+
+#X = c
+#Y=2*c
+#c =10 
+c=20
+x=4*c**3
+y = 2*c
+G = create_graph_v2(x,y)
+
+print(y/avg_shortest_path(G, num_samples=50000))
+
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
+fig = plt.figure()
+"""
+import matplotlib.pyplot as plt
+
+
+avg_shortest_paths = []
+
+for i in range(5, 20):
+     G = create_graph_simple(i)
+     avg_shortest_paths.append(avg_shortest_path(G, num_samples=10000))
+
+plt.plot(list(range(5, 20)), avg_shortest_paths)
+plt.show()
+#print(avg_shortest_path(G, num_samples=10000)) 
+
+"""
