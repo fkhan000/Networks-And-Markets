@@ -176,7 +176,7 @@ def main():
     print(f"With adoption threshold {q} complete cascade has occurred")
     q = q_incompletecascade_graph_fig4_1_left()
     print(f"With adoption threshold {q} complete cascade has not occurred")
-    
+
     q = q_completecascade_graph_fig4_1_right()
     print(f"With adoption threshold {q} complete cascade has occurred")
     q = q_incompletecascade_graph_fig4_1_right()
@@ -195,7 +195,7 @@ def main():
     # === Problem 8(c) === #
     for k in range(0, 250, 10):
         num_infected_li = []
-        for q in np.arange(0, 0.05, 0.5):
+        for q in np.arange(0, 0.5, 0.05):
             avg_num_infected = 0
             for _ in range(100):
                 S = np.random.randint(G.number_of_nodes(), size=k)
@@ -203,7 +203,7 @@ def main():
                 avg_num_infected += num_infected
             avg_num_infected /= 100
             num_infected_li.append(avg_num_infected)
-        plt.plot(np.arange(0, 0.05, 0.5), num_infected_li, label = f"|S| = {k}")
+        plt.plot(np.arange(0, 0.5, 0.05), num_infected_li, label = f"|S| = {k}")
 
     plt.xlabel("Adoption Threshold")
     plt.ylabel("Average Number of Nodes Infected")

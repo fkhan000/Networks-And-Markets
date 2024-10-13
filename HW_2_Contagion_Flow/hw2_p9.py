@@ -10,13 +10,13 @@
 # graded separately). But as long as you collaborate -- even a little bit -- 
 # please put your collaborator's netids here so that we can track groups.
 # ====================================
-authors = ['netID1','netID2']
+authors = ['fsk36']
 
 # ==========Python Version============
 # Which version of python are you using? 
 # "Python 2" or "Python 3"? (Autograder defaults to 3) 
 # ====================================
-python_version = "YourPythonVersionHere"
+python_version = "3.11.5"
 
 
 # ======Submission and Packages=======
@@ -46,8 +46,8 @@ class WeightedDirectedGraph:
     def __init__(self,number_of_nodes):
         '''Assume that nodes are represented by indices/integers between 0 and
         number_of_nodes - 1.'''
-        # TODO: Implement this method
-        pass
+        self.nodes = [set() for _ in range(number_of_nodes)]
+        self.cap_matrix = np.ones((len(self.nodes), len(self.nodes)))*-1
     
     def set_edge(self, origin_node, destination_node, weight=1):
         ''' Modifies the weight for the specified directed edge, from origin 
@@ -55,27 +55,30 @@ class WeightedDirectedGraph:
         If weight = 0, removes the edge from the graph. If edge previously wasn't 
         in the graph, adds a new edge with specified weight. The graph should
         support self-loops.'''
-        # TODO: Implement this method
-        pass
-    
+
+        if weight == 0:
+            self.nodes[origin_node].discard(destination_node)
+            self.cap_matrix[origin_node][destination_node] = -1
+        else:
+            if destination_node not in self.nodes[origin_node]:
+                self.nodes[origin_node].add(destination_node)
+            self.cap_matrix[origin_node][destination_node] = weight
+
     def edges_from(self, origin_node):
         ''' This method shold return a list of all the nodes destination_node 
         such that there is a directed edge (origin_node, destination_node) in the 
         graph (i.e. with weight > 0), supporting self-loops.'''
-        # TODO: Implement this method
-        pass
+        return list(self.nodes[origin_node])
     
     def get_edge(self, origin_node, destination_node):
         ''' This method should return the weight (an integer > 0) 
             if there is an edge between origin_node and 
             destination_node, and 0 otherwise.'''
-        # TODO: Implement this method
-        pass
+        return self.cap_matrix[origin_node][destination_node]
     
     def number_of_nodes(self):
         ''' This method should return the number of nodes in the graph'''
-        # TODO: Implement this method
-        pass
+        return len(self.nodes)
 
 # === Problem 9(a) ===
 def max_flow(G, s, t):
