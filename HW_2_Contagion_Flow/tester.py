@@ -51,6 +51,7 @@ assert testGraph.get_edge(2,1) == 0
 assert testGraph.get_edge(1,1) == 0
 assert testGraph.get_edge(0,2) == 0
 
+
 v, F = hw2_p9.max_flow(testGraph, 0, 2)
 assert v == 1
 assert F.number_of_nodes() == 3
