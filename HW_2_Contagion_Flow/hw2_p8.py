@@ -92,37 +92,75 @@ def contagion_brd(G: UndirectedGraph, S, q):
        - Run BRD on the set of nodes not in S.  A node should switch when the 
          fraction of infected neighbors is >= q.
        Return a list of all nodes infected with X after BRD converges.'''
-    infected = set()
-    for node in S:
-        infected.add(node)
+    
+    # in order to optimize the contagion at each iteration we only look to see if the nodes
+    # at the frontier of the contagion want to swtich
+
+    infected = set(S)
+    neighbor_set = set()
+
+    # get neighbors of infected nodes
+    for node in infected:
+        for neighbor in G.nodes[node]:
+            if neighbor not in infected:
+                neighbor_set.add(neighbor)
+    
     terminate = False
     while(not terminate):
         terminate = True
-        for i in range(G.number_of_nodes()):
-            if i in infected:
-                continue
-            count = 0
-            for index, node in enumerate(G.edges_from(i)):
-                if node in infected:
-                    count += 1
-            if (count / (index + 1)) >= q:
+        neighbors_to_remove = set()
+        neighbors_to_add = set()
+        # for each neighbor to an infected node
+        for node in neighbor_set:
+            # we get its neighbors
+            neighbors = G.nodes[node]
+            # and find how many of them are infected
+            num_infected = len(neighbors.intersection(infected))
+
+            # if it exceeds the threshold
+            if (num_infected / (len(neighbors))) >= q:
+                # we turn off the terminate flag
                 terminate = False
-                infected.add(i)
+                # add it to our infected set
+                infected.add(node)
+                # and remove it from the frontier
+                neighbors_to_remove.add(node)
+
+                # and add its uninfected neighbors to the frontier
+                neighbors_to_add.update(neighbors.difference(infected))
+        # finally we update the neighbor set
+        neighbor_set.difference_update(neighbors_to_remove)
+        neighbor_set.update(neighbors_to_add)
     
+    # once BRD terminates we return the list of infected nodes
     return list(infected)
 
 def threshold_cascade(G, S, num_iter = 5, complete=True):
+    # for a given q if we apply BRD and all of the nodes are infected
+    # we are either at or below the requried adoption threshold. And if we apply
+    # BRD and all nodes aren't infected then we are above the required adoption threshold.
+
+    # So we can use this to perform binary search and very quickly get a good approximation 
+    # of the minimum required adoption threshold
+
     ceil = 1
     floor = 0
     iter = 0
     while(iter < num_iter):
         q = (ceil + floor) / 2
+        # if all nodes have been infected
         if len(contagion_brd(G, S, q)) == G.number_of_nodes():
             if complete:
+                # we update the iter count here 
+                # so that we terminate at a value of q that results in all nodes being infected
                 iter += 1
+            # we need to increase q
             floor = q
         else:
+            # else we decrease q
             if not complete:
+                # and update iter count if we want a value of q that 
+                # results in not all nodes being infected
                 iter += 1
             ceil = q
     return q
@@ -186,23 +224,30 @@ def main():
     # === Problem 8(b) === #
     avg_num_infected = 0
     q = 0.1
+    # over several trials
     for _ in range(100):
+        # we select a random set of adopters and perform BRD with q = 0.1
         S = np.random.randint(G.number_of_nodes(), size=10)
         num_infected = len(contagion_brd(G, S, q))
+        # and obtain the average number of nodes infected
         avg_num_infected += num_infected
     avg_num_infected /= 100
     print(f"Average number of infected nodes is {avg_num_infected}")
     # === Problem 8(c) === #
+    # for varying number of adopters
     for k in range(0, 250, 10):
         num_infected_li = []
+        # and varying values of q
         for q in np.arange(0, 0.5, 0.05):
             avg_num_infected = 0
+            # we calculate the average number of infected
             for _ in range(100):
                 S = np.random.randint(G.number_of_nodes(), size=k)
                 num_infected = len(contagion_brd(G, S, q))
                 avg_num_infected += num_infected
             avg_num_infected /= 100
             num_infected_li.append(avg_num_infected)
+        # and then plot the average number of nodes infected against the adoption threshold
         plt.plot(np.arange(0, 0.5, 0.05), num_infected_li, label = f"|S| = {k}")
 
     plt.xlabel("Adoption Threshold")
