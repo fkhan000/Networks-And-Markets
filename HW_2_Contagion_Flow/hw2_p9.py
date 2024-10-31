@@ -366,14 +366,16 @@ def main():
     N = 100
     probs_match = []
     # we find the probability of a complete match for varying values of p
-    for prob in np.arange(0.1, 1, 0.05):
+    for prob in np.arange(0, 0.1, 0.001):
         probs_match.append(simulate_matching(N, prob))
     
     #and then plot the probability of a complete match against the probability of compatibility
-    plt.plot(np.arange(0.1, 1, 0.05), probs_match)
+    plt.plot(np.arange(0, .1, 0.001), probs_match)
     plt.title("Probability of Complete Match Against Probabilty of Compatibility")
     plt.xlabel("Probability of Compatibility")
     plt.ylabel("Probability of Complete Match")
+
+    plt.show()
 
 if __name__ == "__main__":
     main()
